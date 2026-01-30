@@ -26,7 +26,7 @@ updated: 2026-01-30
 - @MiniMax_AI
 - @binghe
 - @dotey
-- @elonmusk
+# - @elonmusk (removed)
 
 ## Defaults
 - 每人每日抓取最近 N=10 条（或过去 24h），只保留与 AI/Agent/自动化相关的。
