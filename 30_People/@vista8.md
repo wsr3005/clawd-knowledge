@@ -2,7 +2,8 @@
 type: person
 handle: "@vista8"
 focus: [ai_workflow, skills, automation]
-follow_status: candidate
+follow_status: followed
+followed_at: 2026-01-30
 updated: 2026-01-30
 ---
 
