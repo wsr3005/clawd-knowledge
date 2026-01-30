@@ -12,6 +12,21 @@ updated: 2026-01-30
 ## Handles
 - @vista8
 - @op7418
+- @lidangzzz
+- @YukerX
+- @sodawhite_dev
+- @lyc_zh
+- @fmdz387
+- @servasyy_ai
+- @Khazix0918
+- @akokoi1
+- @AppSaildotDEV
+- @mike_chong_zh
+- @lxfater
+- @MiniMax_AI
+- @binghe
+- @dotey
+- @elonmusk
 
 ## Defaults
 - 每人每日抓取最近 N=10 条（或过去 24h），只保留与 AI/Agent/自动化相关的。
