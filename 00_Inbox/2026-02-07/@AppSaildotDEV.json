@@ -1,0 +1,62 @@
+[
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Fri Feb 06 02:38:24 +0000 2026",
+    "url": null,
+    "text": "卧槽，卧槽\n\n赛博活佛 ZenMux 宣布：Claude Opus 4.6 限时免费，让大家爽玩两周！\n\n家大业大啊，大家快到 Discord 社群来调戏小龙虾"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Fri Feb 06 05:11:41 +0000 2026",
+    "url": null,
+    "text": "免费模型只能在网页 chat  里面使用，API 还是的付费的"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Fri Feb 06 07:09:55 +0000 2026",
+    "url": null,
+    "text": "体验入口：https://t.co/wyhO2r7NgP"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Fri Jan 30 19:48:13 +0000 2026",
+    "url": null,
+    "text": "「如果你没用过星连VPN，\n你不会知道VPN原来可以这么快。」\n\n【仅19元】即享：\n- 免费试用，满意再订阅\n- 无限设备、100+国家节点、优质IP\n- 秒开视频、速度超过99%VPN/机场\n\n春节「7折」优惠活动\n优惠码：SingLink07（券后仅19元）\n\n关注我们 @SingLinkVPN 了解更多福利"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Fri Feb 06 00:31:29 +0000 2026",
+    "url": null,
+    "text": "GPT-5.3-Codex vs Claude Opus 4.6\n\n先不说其他的，光看名字，你觉得谁牛一些\n\n论起名的重要性！"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Thu Feb 05 18:36:50 +0000 2026",
+    "url": null,
+    "text": "不是 Cloud Opus 5 吗，怎么又叫 Cloud Opus 4.6 了呢，不够自信吗，多少宣发稿都得修改了 https://t.co/rel8s2HHSI"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Thu Feb 05 07:36:11 +0000 2026",
+    "url": null,
+    "text": "wk，有戏了\n\n因为 OpenClaw 实在是太烧 tokens 了，这两天在折腾 OpenClaw QMD - Query Markup Documents，好像看到希望了\n\n之前是传递了很多很多很多 request tokens，目前看起来只要原来 10%-30%  就可以了\n\n老早之前的历史消息，他也能翻出来"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Thu Feb 05 07:46:13 +0000 2026",
+    "url": null,
+    "text": "安装文档：https://t.co/mYnDSUhdEk\nhttps://t.co/LFdAZf0MSC\n作者是 Shopify 的创始人"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Thu Feb 05 04:20:07 +0000 2026",
+    "url": null,
+    "text": "你这不行呀，乱花冤枉钱，下次买 App 之前先到 https://t.co/MjM1Xhe9DL 看一下，能省下不少钱"
+  },
+  {
+    "handle": "@AppSaildotDEV",
+    "created": "Thu Feb 05 01:59:31 +0000 2026",
+    "url": null,
+    "text": "gu老师，搞起来，这个挺好玩的\n\n现在 Discord 本身就很强大，现在能够很好的识别文本和图片，TTS、语音可以接入 API\n\n问题就是 太烧 tokens 了，几十刀一下就没了，玩不转啊\n\nOpenClaw 有哪些缓存方案啊，我这两天在研究 QMD 了，感觉能够解决大部分问题"
+  }
+]
