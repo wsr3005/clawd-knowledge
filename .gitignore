@@ -3,3 +3,5 @@
 .obsidian/cache
 
 .cache/
+.daily_fetch/
+.daily_following/
