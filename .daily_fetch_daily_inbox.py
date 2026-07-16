@@ -12,6 +12,8 @@ import math
 import pathlib
 import re
 import subprocess
+import urllib.parse
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 
@@ -28,6 +30,10 @@ MAX_PER_HANDLE = 4
 MAX_WORKERS = 4
 FETCH_TIMEOUT = 25
 LOOKBACK_HOURS = 48
+AIHOT_BASE = "https://aihot.virxact.com"
+AIHOT_UA = "hermes-ai-radar/1.0 (+local-readonly)"
+AIHOT_TIMEOUT = 25
+AIHOT_CACHE = REPO / ".daily_fetch" / "aihot_latest.json"
 
 BATTLEFIELD_TERMS = {
     "claude code": 6, "codex": 6, "hermes": 6, "openclaw": 5,
@@ -60,6 +66,114 @@ def run(cmd, timeout=FETCH_TIMEOUT):
     return subprocess.run(
         cmd, cwd=str(REPO), text=True, capture_output=True, timeout=timeout
     )
+
+
+def fetch_json(url: str, timeout=AIHOT_TIMEOUT):
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": AIHOT_UA, "Accept": "application/json"},
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.load(response)
+
+
+def normalize_aihot_item(item: dict):
+    return {
+        "id": str(item.get("id") or ""),
+        "title": item.get("title") or "",
+        "summary": item.get("summary") or "",
+        "source": item.get("source") or "",
+        "published_at": item.get("publishedAt") or "",
+        "category": item.get("category"),
+        "score": item.get("score"),
+        "original_url": item.get("url") or "",
+        "permalink": item.get("permalink") or "",
+        "attribution": item.get("attribution") or {},
+        "evidence_note": "AI HOT摘要为AI生成；数字、政策、原话与商业成绩须回原始来源复核",
+    }
+
+
+def collect_aihot(now):
+    """Collect AI HOT as a broad upstream source with a stale-cache fallback."""
+    cached = {}
+    if AIHOT_CACHE.exists():
+        try:
+            cached = json.loads(AIHOT_CACHE.read_text(encoding="utf-8"))
+        except Exception:
+            cached = {}
+
+    try:
+        version = fetch_json(f"{AIHOT_BASE}/api/public/version")
+        fingerprint = fetch_json(f"{AIHOT_BASE}/api/public/fingerprint")
+        selected_fp = fingerprint.get("selected")
+        refresh = not cached or cached.get("selected_fingerprint") != selected_fp
+        if refresh:
+            since = (now - timedelta(hours=24)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            query = urllib.parse.urlencode({
+                "mode": "selected",
+                "since": since,
+                "take": 100,
+            })
+            item_response = fetch_json(f"{AIHOT_BASE}/api/public/items?{query}")
+            raw_items = item_response.get("items") or []
+        else:
+            raw_items = cached.get("raw_items") or []
+        hot_response = fetch_json(f"{AIHOT_BASE}/api/public/hot-topics")
+        hot_topics = hot_response.get("items") or []
+        cache_payload = {
+            "fetched_at": now.isoformat(),
+            "selected_fingerprint": selected_fp,
+            "api_version": version.get("apiVersion"),
+            "skill_version": version.get("skillVersion"),
+            "raw_items": raw_items,
+            "hot_topics": hot_topics,
+        }
+        AIHOT_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        AIHOT_CACHE.write_text(
+            json.dumps(cache_payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        status = "ok"
+        error = None
+    except Exception as exc:
+        raw_items = cached.get("raw_items") or []
+        hot_topics = cached.get("hot_topics") or []
+        selected_fp = cached.get("selected_fingerprint")
+        version = {
+            "apiVersion": cached.get("api_version"),
+            "skillVersion": cached.get("skill_version"),
+        }
+        refresh = False
+        status = "stale-cache" if cached else "error"
+        error = f"{type(exc).__name__}: {exc}"
+
+    cutoff = now - timedelta(hours=24)
+    items = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        published = item.get("publishedAt") or ""
+        try:
+            published_dt = datetime.fromisoformat(published.replace("Z", "+00:00"))
+        except ValueError:
+            published_dt = None
+        if published_dt and published_dt < cutoff:
+            continue
+        normalized = normalize_aihot_item(item)
+        if normalized["id"] and normalized["title"]:
+            items.append(normalized)
+
+    return {
+        "status": status,
+        "error": error,
+        "api_version": version.get("apiVersion"),
+        "skill_version": version.get("skillVersion"),
+        "selected_fingerprint": selected_fp,
+        "refreshed": refresh,
+        "window_hours": 24,
+        "items": items,
+        "hot_topics": hot_topics,
+    }
 
 
 def parse_dt(value: str):
@@ -251,7 +365,9 @@ def main():
     metadata = load_authority_metadata()
     known_ids = load_known_ids()
     following, following_delta = capture_following()
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+    now = datetime.now(timezone.utc)
+    aihot = collect_aihot(now)
+    cutoff = now - timedelta(hours=LOOKBACK_HOURS)
 
     items = []
     failures = []
@@ -292,8 +408,8 @@ def main():
             break
 
     pack = {
-        "schema_version": 2,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "schema_version": 3,
+        "generated_at": now.isoformat(),
         "date": TODAY,
         "purpose": "candidate_material_only_not_user_facing",
         "tracked_handles": handles,
@@ -302,6 +418,7 @@ def main():
         "failures": sorted(failures, key=lambda x: x["handle"].lower()),
         "raw_candidate_count": len(deduped),
         "candidates": selected,
+        "aihot": aihot,
     }
     PACK.write_text(json.dumps(pack, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     new_following = [
@@ -322,6 +439,10 @@ def main():
         "following_new": new_following,
         "following_removed": removed_following,
         "candidate_count": len(selected),
+        "aihot_status": aihot.get("status"),
+        "aihot_items": len(aihot.get("items") or []),
+        "aihot_hot_topics": len(aihot.get("hot_topics") or []),
+        "aihot_error": aihot.get("error"),
         "failures": failures,
     }, ensure_ascii=False, indent=2))
 
